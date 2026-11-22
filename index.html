@@ -26,6 +26,33 @@ header h1{margin:0;font-size:19px}
 .store{display:flex;background:rgba(0,0,0,.18);border-radius:12px;padding:3px;margin-top:10px}
 .store button{flex:1;border:none;background:transparent;color:#f3f3ee;padding:9px 1px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap}
 .store button.on{background:#fff;color:var(--ink)}
+.mode{display:flex;gap:6px;margin-bottom:8px}
+.mode button{flex:1;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:7px 4px;border-radius:999px;font-size:13px;font-weight:600}
+.mode button.on{background:#fff;color:var(--ink)}
+body.plan{--green:#6a4c93;--green-d:#4e3572;--green-l:#efe9f7}
+body.plan .store,body.plan .steps,body.plan footer,body.plan .view{display:none!important}
+body.plan{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+#vp{display:none}body.plan #vp{display:block}
+.pv{display:none}.pv.on{display:block}
+.day{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.day.done{opacity:.6}
+.dh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.st{font-size:12px;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.st.ok{background:#e3f3e1;color:#246b27}.st.warn{background:#fff1dc;color:#9a5a00}.st.none{background:#eee;color:#666}.st.done{background:#e8e8e8;color:#444}
+.day select,.prow select,.prow input{padding:10px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;color:var(--ink);min-width:0}
+.day select{width:100%}
+.miss{font-size:12px;color:#9a5a00;margin-top:6px}
+.dfoot{display:flex;justify-content:flex-end;margin-top:6px}
+.sbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-size:13px;color:var(--ink)}
+.box2{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+.box2 h3{margin:0 0 6px;font-size:15px}
+.mline{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;border-bottom:1px dotted var(--line)}
+.prow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.prow .q{width:70px}
+.prow .x{border:none;background:none;font-size:18px;color:#c0392b;padding:4px}
+.dish{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.dish .name small{white-space:normal}
+.sgrp{font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:700}
 body.tesai{--green:#8a5a1c;--green-d:#6b4310;--green-l:#f5ecdc}
 body.carne{--green:#a3362a;--green-d:#7d2419;--green-l:#f8e7e3}
 body.super header{background:#1d5fa8}
@@ -80,7 +107,7 @@ body.editing .item{border-style:dashed}
 .sheet select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:#fff;color:var(--ink)}
 .btn.del{background:#fff;color:#c0392b;border:1px solid #e3b4ae}
 .btn.del.armed{background:#c0392b;color:#fff}
-#edEmojiBtn{width:46px;height:46px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:24px;padding:0;flex:none}
+#dEmojiBtn,#edEmojiBtn{width:46px;height:46px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:24px;padding:0;flex:none}
 .egrid{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;max-height:200px;overflow-y:auto;padding:6px;border:1px solid var(--line);border-radius:12px;background:#fbfaf6;margin-top:8px}
 .egrid[hidden]{display:none}
 .egrid button{height:44px;border:1px solid transparent;border-radius:10px;background:transparent;font-size:24px;padding:0}
@@ -114,6 +141,7 @@ footer button{flex:1;padding:14px;border-radius:14px;font-size:16px;font-weight:
 </head>
 <body>
 <header>
+  <div class="mode"><button id="mPed" class="on">🛍️ Pedidos</button><button id="mPlan">🍽️ Plan semanal</button></div>
   <h1 id="title">🥕 Pedido a la verdulería</h1>
   <div class="store"><button id="stVerdu" class="on">🥕 Verdulería</button><button id="stSuper">🛒 Súper</button><button id="stCarne">🥩 Carne</button><button id="stTesai">🌰 Tesai</button></div>
   <div class="steps"><div id="s1" class="on">1 · Elegir</div><div id="s2">2 · Revisar</div><div id="s3">3 · Enviar</div></div>
@@ -161,7 +189,38 @@ footer button{flex:1;padding:14px;border-radius:14px;font-size:16px;font-weight:
     <a class="btn wa" id="sendWa" href="#" target="_blank" rel="noopener">💬 Enviar por WhatsApp</a>
     <button class="btn copy" id="copy">📋 Copiar el pedido</button>
     <p class="note" id="waNote"></p>
+    <button class="btn copy" id="received">✅ Ya lo recibí: sumar al stock</button>
     <button class="btn ghost" id="reset">Empezar un pedido nuevo</button>
+  </section>
+  <!-- PLAN SEMANAL -->
+  <section id="vp">
+    <div class="tabs" id="ptabs">
+      <button data-pt="sem" class="on">📅 Semana</button><button data-pt="pla">🍲 Platos</button><button data-pt="sto">📦 Stock</button>
+    </div>
+    <div class="pv on" id="pv-sem">
+      <div class="toolrow"><span class="hint">Elegí la cena de cada día</span>
+        <span><button class="tbtn" id="pSuggest">🎲 Sugerir</button> <button class="tbtn" id="pNew">🗓️ Nueva semana</button></span></div>
+      <div id="days"></div>
+      <div class="box2" id="missBox"></div>
+      <a class="btn wa" id="pShare" href="#" target="_blank" rel="noopener">💬 Compartir plan por WhatsApp</a>
+    </div>
+    <div class="pv" id="pv-pla">
+      <button class="btn mail" id="dNew" style="margin-top:0">+ Nuevo plato</button>
+      <div id="dishes" style="margin-top:10px"></div>
+      <button class="tbtn" id="dRestore" style="margin-top:6px">↺ Platos originales</button>
+    </div>
+    <div class="pv" id="pv-sto">
+      <div class="box2">
+        <h3>Agregar al stock</h3>
+        <div class="prow"><select id="sStore" style="flex:1"></select></div>
+        <div class="prow"><select id="sProd" style="flex:1"></select></div>
+        <div class="prow"><input id="sQty" class="q" type="number" inputmode="decimal" step="any" min="0"><span id="sUnit" style="flex:1"></span>
+          <button class="sbtn" id="sAdd" style="background:var(--green);color:#fff;border:none">Agregar</button></div>
+        <p class="note" style="margin:0">También se carga solo: en el paso Enviar de cada pedido tocá "Ya lo recibí".</p>
+      </div>
+      <div id="stockList"></div>
+      <button class="tbtn" id="sClear" style="margin-top:8px">Vaciar stock</button>
+    </div>
   </section>
 </main>
 
@@ -180,6 +239,19 @@ footer button{flex:1;padding:14px;border-radius:14px;font-size:16px;font-weight:
   <button class="btn mail" id="edSave">Guardar cambios</button>
   <button class="btn del" id="edDel">🗑️ Borrar producto</button>
   <button class="btn ghost" id="edCancel">Cancelar</button>
+</div></div>
+<div class="sheet" id="dsheet" hidden><div class="box">
+  <h3 id="dsTitle">Plato</h3>
+  <label for="dName">Ícono y nombre</label>
+  <div class="row"><button id="dEmojiBtn" class="emojiPick" type="button" aria-label="Cambiar ícono"></button>
+    <input class="f" id="dName"></div>
+  <div class="egrid" id="dGrid" hidden></div>
+  <label>Ingredientes (lo que se usa para una cena)</label>
+  <div id="dIngs"></div>
+  <button class="tbtn" id="dAddIng" type="button">+ Ingrediente</button>
+  <button class="btn mail" id="dSave">Guardar plato</button>
+  <button class="btn del" id="dDel">🗑️ Borrar plato</button>
+  <button class="btn ghost" id="dCancel">Cancelar</button>
 </div></div>
 <div class="toast" id="toast"></div>
 
@@ -230,7 +302,7 @@ const STORES = {
     ["🥩","Carnaza","kg"],["🥩","Carne picada común","kg"],["🥩","Carne picada especial","kg"],["🥩","Milanesas de nalga","kg"]],
   "Cerdo":[
     ["🐖","Bondiola","kg"],["🐖","Matambre de cerdo","kg"],["🐖","Pechito de cerdo","kg"],["🐖","Costillitas","kg"],
-    ["🐖","Carré","kg"],["🐖","Solomillo","kg"]],
+    ["🐖","Carré","kg"],["🐖","Solomillo","kg"],["🥓","Panceta","kg"]],
   "Pollo":[
     ["🍗","Pollo entero","u"],["🍗","Pata y muslo","kg"],["🍗","Pechuga","kg"],["🍗","Suprema","kg"],
     ["🍗","Alitas","kg"],["🍗","Milanesas de pollo","kg"]],
@@ -246,11 +318,11 @@ const STORES = {
     ["🫒","Aceite de oliva","u"],["🧂","Sal","u"],["🍬","Azúcar","u"],["🌾","Harina 000","u"],
     ["🥫","Arvejas / choclo lata","u"],["🐟","Atún","u"],["🍪","Galletitas","paq"],["🥣","Avena / cereales","u"],
     ["🍯","Dulce de leche","u"],["🍓","Mermelada","u"],["🫙","Mayonesa","u"],["🫙","Vinagre","u"],
-    ["🫘","Lentejas / legumbres","u"],["🍞","Pan lactal","u"],["🧻","Papel higiénico","paq"],["🌭","Salchichas","paq"]],
+    ["🫘","Lentejas / legumbres","u"],["🍞","Pan lactal","u"],["🧻","Papel higiénico","paq"],["🌭","Salchichas","paq"],["🍞","Pan rallado","u"],["🌽","Polenta","u"]],
   "Lácteos y frescos":[
     ["🥛","Leche","u"],["🥛","Yogur","u"],["🧈","Manteca","u"],["🧀","Queso cremoso","kg"],
     ["🧀","Queso rallado","u"],["🧀","Queso untable","u"],["🍶","Crema de leche","u"],["🥚","Huevos","docena"],
-    ["🥟","Tapas de empanada","paq"],["🍕","Prepizza","u"]],
+    ["🥟","Tapas de empanada","paq"],["🥧","Tapas de tarta","paq"],["🍕","Prepizza","u"]],
   "Bebidas":[
     ["💧","Agua","u"],["🥤","Gaseosa","u"],["🧃","Jugo","u"],["🍷","Vino","u"],
     ["🍺","Cerveza","u"],["🫧","Soda","u"]],
@@ -258,7 +330,7 @@ const STORES = {
     ["🧴","Detergente","u"],["🧴","Lavandina","u"],["🧺","Jabón para ropa","u"],["🧺","Suavizante","u"],
     ["🧽","Esponjas","paq"],["🧻","Rollo de cocina","paq"],["🗑️","Bolsas de residuos","paq"],["🧴","Limpiador de pisos","u"]],
   "Congelados":[
-    ["🍟","Papas fritas cong.","u"],["🍔","Hamburguesas","paq"],["🍦","Helado","u"],["🥦","Verduras congeladas","u"]]
+    ["🍟","Papas fritas cong.","u"],["🍔","Hamburguesas","paq"],["🍦","Helado","u"],["🥦","Verduras congeladas","u"],["🐟","Filet de merluza","kg"]]
  }}
 };
 const STEP = {kg:0.5,u:1,atado:1,docena:0.5,paq:1,g:50};
@@ -271,6 +343,13 @@ const store = {
 };
 
 ["cart","custom","mail","tel","addr","notes"].forEach(x=>{try{const o=localStorage.getItem("verdu_"+x);if(o!==null&&localStorage.getItem("verdu_verdu_"+x)===null){localStorage.setItem("verdu_verdu_"+x,o)}}catch(e){}});
+const NEWV2={carne:[["🥓","Panceta","kg","Cerdo"]],
+  super:[["🍞","Pan rallado","u","Almacén"],["🌽","Polenta","u","Almacén"],["🥧","Tapas de tarta","paq","Lácteos y frescos"],["🐟","Filet de merluza","kg","Congelados"]]};
+for(const [sid,arr] of Object.entries(NEWV2)){
+  const its=store.get(sid+"_items",null);
+  if(its && store.get(sid+"_catv",1)<2){ arr.forEach(i=>{ if(!its.some(x=>x[1]===i[1])) its.push(i) }); store.set(sid+"_items",its); }
+  store.set(sid+"_catv",2);
+}
 let cur = store.get("cur","verdu");
 let S, CATALOG, UNITS, items, cart, tab, step = 1, editMode = false;
 const k = x => cur+"_"+x;
@@ -280,8 +359,8 @@ function loadStore(){
   items=store.get(k("items"),null);
   if(!items){ items=defaultItems(); store.get(k("custom"),[]).forEach(i=>{ if(!items.some(x=>x[1]===i[1])) items.push([i[0],i[1],i[2],i[3]]) }); }
 }
-function defaultItems(){
-  const out=[]; for(const [cat,arr] of Object.entries(CATALOG)) arr.forEach(i=>out.push([i[0],i[1],i[2],cat])); return out;
+function defaultItems(C){
+  const out=[]; for(const [cat,arr] of Object.entries(C||CATALOG)) arr.forEach(i=>out.push([i[0],i[1],i[2],cat])); return out;
 }
 loadStore();
 
@@ -490,8 +569,248 @@ $("back").onclick=()=>{ if(step>1) go(step-1) };
 
 let tt; function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1800)}
 
+
+// ================= PLAN SEMANAL =================
+const SIDS=["verdu","super","carne","tesai"];
+const SNAME={verdu:"🥕 Verdulería",super:"🛒 Súper",carne:"🥩 Kraft",tesai:"🌰 Tesai"};
+const DAYS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+const I=(s,n,q,u)=>({s,n,q,u});
+const DEFAULT_DISHES=[
+ {id:"d1",e:"🥧",n:"Pastel de carne",ing:[I("carne","Carne picada común",0.5,"kg"),I("verdu","Papa",1,"kg"),I("verdu","Cebolla",0.5,"kg"),I("verdu","Huevos",0.5,"docena"),I("super","Leche",0.5,"u")]},
+ {id:"d2",e:"🥩",n:"Milanesas de carne",ing:[I("carne","Milanesas de nalga",1,"kg")]},
+ {id:"d3",e:"🍗",n:"Milanesas de pollo",ing:[I("carne","Milanesas de pollo",1,"kg")]},
+ {id:"d4",e:"🥕",n:"Verduras al horno",ing:[I("verdu","Papa",0.5,"kg"),I("verdu","Batata",0.5,"kg"),I("verdu","Zapallo",0.5,"kg"),I("verdu","Cebolla",0.5,"kg"),I("verdu","Morrón rojo",0.5,"kg")]},
+ {id:"d5",e:"🌽",n:"Polenta con salsa",ing:[I("super","Polenta",1,"u"),I("super","Puré de tomate",1,"u"),I("super","Queso rallado",0.5,"u")]},
+ {id:"d6",e:"🫘",n:"Lentejas con panceta",ing:[I("super","Lentejas / legumbres",1,"u"),I("carne","Panceta",0.5,"kg"),I("verdu","Cebolla",0.5,"kg"),I("verdu","Zanahoria",0.5,"kg"),I("verdu","Morrón rojo",0.5,"kg")]},
+ {id:"d7",e:"🐟",n:"Pescado al horno",ing:[I("super","Filet de merluza",1,"kg"),I("verdu","Limón",0.5,"kg"),I("verdu","Papa",0.5,"kg")]},
+ {id:"d8",e:"🍳",n:"Tortilla de zapallitos",ing:[I("verdu","Zapallito",1,"kg"),I("verdu","Huevos",0.5,"docena"),I("verdu","Cebolla",0.5,"kg")]},
+ {id:"d9",e:"🥔",n:"Puré de papas",ing:[I("verdu","Papa",1,"kg"),I("super","Leche",0.5,"u"),I("super","Manteca",0.5,"u")]},
+ {id:"d10",e:"🎃",n:"Puré de calabaza / zapallo",ing:[I("verdu","Calabaza (anco)",1,"kg"),I("super","Manteca",0.5,"u")]},
+ {id:"d11",e:"🍝",n:"Fideos con tuco",ing:[I("super","Fideos secos",1,"paq"),I("super","Puré de tomate",1,"u"),I("verdu","Cebolla",0.5,"kg"),I("super","Queso rallado",0.5,"u")]},
+ {id:"d12",e:"🍗",n:"Pollo al horno con papas",ing:[I("carne","Pata y muslo",1.5,"kg"),I("verdu","Papa",1,"kg")]},
+ {id:"d13",e:"🥬",n:"Tarta de acelga",ing:[I("super","Tapas de tarta",1,"paq"),I("verdu","Acelga",1,"atado"),I("verdu","Huevos",0.5,"docena"),I("verdu","Cebolla",0.5,"kg")]},
+ {id:"d14",e:"🍕",n:"Pizza casera",ing:[I("super","Prepizza",2,"u"),I("super","Queso cremoso",0.5,"kg"),I("super","Puré de tomate",1,"u")]},
+ {id:"d15",e:"♻️",n:"Sobras",ing:[]},
+ {id:"d16",e:"🛵",n:"Afuera / delivery",ing:[]}
+];
+let dishes=store.get("dishes",null)||JSON.parse(JSON.stringify(DEFAULT_DISHES));
+let plan=store.get("plan",{});           // day -> {d:dishId, c:[deducted]|null}
+let stock=store.get("stock",{});         // "sid|name" -> {q,u,e}
+const saveP=()=>{store.set("dishes",dishes);store.set("plan",plan);store.set("stock",stock)};
+const skey=(s,n)=>s+"|"+n;
+const dishById=id=>dishes.find(d=>d.id===id);
+
+function itemsOf(sid){ if(sid===cur) return items; return store.get(sid+"_items",null)||defaultItems(STORES[sid].catalog); }
+function emojiOf(s,n){ const it=itemsOf(s).find(i=>i[1]===n); return it?it[0]:"🧺"; }
+function cartOf(sid){ return sid===cur?cart:store.get(sid+"_cart",{}); }
+function putCart(sid,c){ if(sid===cur){ save(); } else store.set(sid+"_cart",c); }
+
+// --- análisis de stock vs plan
+function analyze(){
+  const avail={}; for(const [k,v] of Object.entries(stock)) avail[k]={q:v.q,u:v.u};
+  const perDay={}, total={};
+  for(let i=0;i<7;i++){
+    const p=plan[i]; perDay[i]=null; if(!p||!p.d) continue;
+    const d=dishById(p.d); if(!d){perDay[i]=null;continue}
+    if(p.c){ perDay[i]={done:true,miss:[]}; continue; }
+    const miss=[];
+    d.ing.forEach(g=>{
+      const k=skey(g.s,g.n), h=avail[k]; let short=g.q;
+      if(h){ if(h.u===g.u){ const use=Math.min(h.q,g.q); h.q-=use; short=g.q-use; } else if(h.q>0){ short=0; } }
+      short=Math.round(short*100)/100;
+      if(short>0){ miss.push({...g,q:short}); const t=total[k]||(total[k]={...g,q:0}); t.q=Math.round((t.q+short)*100)/100; }
+    });
+    perDay[i]={done:false,miss,empty:!d.ing.length};
+  }
+  return {perDay,total:Object.values(total)};
+}
+
+// --- vistas
+function renderWeek(){
+  const A=analyze();
+  const opts=d=>`<option value="">— elegir cena —</option>`+dishes.map(x=>`<option value="${x.id}"${x.id===d?" selected":""}>${x.e} ${esc(x.n)}</option>`).join("");
+  $("days").innerHTML=DAYS.map((name,i)=>{
+    const p=plan[i]||{}, a=A.perDay[i];
+    let st=`<span class="st none">sin elegir</span>`, miss="", foot="";
+    if(a&&a.done){ st=`<span class="st done">✔ cocinado</span>`; foot=`<button class="sbtn" data-pundo="${i}">↩ Deshacer</button>`; }
+    else if(a){
+      st = a.miss.length?`<span class="st warn">⚠️ faltan ${a.miss.length}</span>`:`<span class="st ok">✅ ${a.empty?"listo":"hay todo"}</span>`;
+      if(a.miss.length) miss=`<div class="miss">Falta: ${a.miss.map(m=>`${esc(m.n)} ${fmt(m.q)} ${UNIT_LABEL[m.u]||m.u}`).join(" · ")}</div>`;
+      foot=`<button class="sbtn" data-pcook="${i}">🍳 Cocinado (descontar stock)</button>`;
+    }
+    return `<div class="day${a&&a.done?" done":""}"><div class="dh"><b>${name}</b>${st}</div>
+      <select data-pday="${i}"${a&&a.done?" disabled":""}>${opts(p.d)}</select>${miss}<div class="dfoot">${foot}</div></div>`;
+  }).join("");
+  const T=A.total;
+  $("missBox").innerHTML = T.length
+    ? `<h3>🧾 Falta para la semana</h3>`+SIDS.map(sid=>{
+        const L=T.filter(t=>t.s===sid); if(!L.length) return "";
+        return `<div class="sgrp">${SNAME[sid]}</div>`+L.map(t=>`<div class="mline"><span>${emojiOf(t.s,t.n)} ${esc(t.n)}</span><b>${fmt(t.q)} ${UNIT_LABEL[t.u]||t.u}</b></div>`).join("");
+      }).join("")+`<button class="btn mail" id="pToCart">🛒 Agregar faltantes a los pedidos</button>`
+    : `<h3>🧾 Falta para la semana</h3><div class="note" style="margin:0">${Object.keys(plan).some(i=>plan[i]&&plan[i].d)?"¡Nada! Con el stock alcanza 👌":"Elegí las cenas y acá vas a ver qué hay que comprar."}</div>`;
+  if($("pToCart")) $("pToCart").onclick=()=>missingToCarts(T);
+  let txt="🍽️ Cenas de la semana\n\n";
+  DAYS.forEach((n,i)=>{const d=plan[i]&&dishById(plan[i].d); txt+=`${n}: ${d?d.e+" "+d.n:"—"}\n`});
+  $("pShare").href="https://wa.me/?text="+encodeURIComponent(txt);
+}
+function missingToCarts(T){
+  const touched=new Set();
+  T.forEach(t=>{
+    const c=cartOf(t.s), st=STEP[t.u]||1, q=Math.ceil(t.q/st-1e-9)*st;
+    if(c[t.n]&&c[t.n].unit===t.u) c[t.n].qty=Math.round((c[t.n].qty+q)*100)/100;
+    else if(!c[t.n]) c[t.n]={qty:q,unit:t.u,emoji:emojiOf(t.s,t.n)};
+    putCart(t.s,c); touched.add(SNAME[t.s]);
+  });
+  toast("Agregado a: "+[...touched].join(", "));
+}
+function cook(i){
+  const p=plan[i], d=p&&dishById(p.d); if(!d) return;
+  const ded=[];
+  d.ing.forEach(g=>{ const k=skey(g.s,g.n), h=stock[k]; if(h&&h.u===g.u&&h.q>0){ const use=Math.min(h.q,g.q); h.q=Math.round((h.q-use)*100)/100; ded.push({k,q:use,u:g.u,e:h.e}); if(h.q<=0) delete stock[k]; } });
+  p.c=ded; saveP(); renderWeek(); toast("Descontado del stock ✔");
+}
+function uncook(i){
+  const p=plan[i]; if(!p||!p.c) return;
+  p.c.forEach(x=>{ const h=stock[x.k]||(stock[x.k]={q:0,u:x.u,e:x.e}); h.q=Math.round((h.q+x.q)*100)/100; });
+  p.c=null; saveP(); renderWeek();
+}
+function suggest(){
+  const A0=()=>analyze();
+  const cand=dishes.filter(d=>d.ing.length);
+  const used=new Set(Object.values(plan).map(p=>p&&p.d).filter(Boolean));
+  for(let i=0;i<7;i++){
+    if(plan[i]&&plan[i].d) continue;
+    const pool=cand.filter(d=>!used.has(d.id)); const list=pool.length?pool:cand; if(!list.length) break;
+    // preferir lo que hay en stock
+    const scored=list.map(d=>{ plan[i]={d:d.id,c:null}; const m=A0().perDay[i].miss.length; return {d,m:m+Math.random()*1.5}; }).sort((a,b)=>a.m-b.m);
+    plan[i]={d:scored[0].d.id,c:null}; used.add(scored[0].d.id);
+  }
+  saveP(); renderWeek(); toast("Semana sugerida 🎲 (cambiá lo que quieras)");
+}
+
+function renderDishes(){
+  $("dishes").innerHTML=dishes.map(d=>`<div class="dish"><span class="emoji">${d.e}</span><span class="name">${esc(d.n)}
+    <small>${d.ing.length?d.ing.map(g=>esc(g.n)).join(", "):"sin ingredientes"}</small></span>
+    <button class="ebtn" data-pdish="${d.id}" aria-label="Editar">✏️</button></div>`).join("");
+}
+function renderStock(){
+  const keys=Object.keys(stock);
+  $("stockList").innerHTML = keys.length ? SIDS.map(sid=>{
+    const L=keys.filter(k=>k.startsWith(sid+"|")).sort(); if(!L.length) return "";
+    return `<div class="sgrp">${SNAME[sid]}</div>`+L.map(k=>{const v=stock[k], n=k.slice(sid.length+1);
+      return `<div class="item sel"><span class="emoji">${v.e||"🧺"}</span><span class="name">${esc(n)}</span>
+      <span class="qty"><button data-sdec="${esc(k)}">−</button><span class="val">${fmt(v.q)} <small>${UNIT_LABEL[v.u]||v.u}</small></span><button data-sinc="${esc(k)}">+</button></span></div>`}).join("");
+  }).join("") : `<div class="empty">El stock está vacío. Cargalo arriba o desde un pedido recibido.</div>`;
+}
+function fillProd(sel,sid,cur0){
+  const its=itemsOf(sid).slice().sort((a,b)=>a[1].localeCompare(b[1]));
+  sel.innerHTML=its.map(i=>`<option value="${esc(i[1])}" data-u="${i[2]}"${i[1]===cur0?" selected":""}>${i[0]} ${esc(i[1])}</option>`).join("");
+}
+function fillStore(sel,v){ sel.innerHTML=SIDS.map(s=>`<option value="${s}"${s===v?" selected":""}>${SNAME[s]}</option>`).join(""); }
+function syncStockForm(){
+  const o=$("sProd").selectedOptions[0]; const u=o?o.dataset.u:"u";
+  $("sUnit").textContent=UNIT_LABEL[u]||u; $("sQty").value=START[u]||1; $("sQty").step=STEP[u]||1;
+}
+$("sStore").onchange=()=>{fillProd($("sProd"),$("sStore").value);syncStockForm()};
+$("sProd").onchange=syncStockForm;
+$("sAdd").onclick=()=>{
+  const sid=$("sStore").value, n=$("sProd").value, u=$("sProd").selectedOptions[0].dataset.u, q=parseFloat(String($("sQty").value).replace(",","."));
+  if(!n||!(q>0)) return toast("Poné una cantidad");
+  addStock(sid,n,q,u); saveP(); renderStock(); toast("Sumado al stock: "+n);
+};
+function addStock(sid,n,q,u){
+  const k=skey(sid,n), h=stock[k];
+  if(h&&h.u===u) h.q=Math.round((h.q+q)*100)/100; else stock[k]={q,u,e:emojiOf(sid,n)};
+}
+$("sClear").onclick=()=>{const b=$("sClear"); if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Seguro? Tocá de nuevo";setTimeout(()=>{delete b.dataset.armed;b.textContent="Vaciar stock"},3000);return}
+  delete b.dataset.armed;b.textContent="Vaciar stock";stock={};saveP();renderStock();toast("Stock vacío")};
+
+// pedido recibido -> stock
+$("received").onclick=()=>{
+  const names=Object.keys(cart); if(!names.length) return toast("El pedido está vacío");
+  names.forEach(n=>addStock(cur,n,cart[n].qty,cart[n].unit)); saveP();
+  cart={}; save(); go(1); toast("Sumado al stock ✔ y pedido vaciado");
+};
+
+// --- editor de platos
+let dEditing=null;
+const dPick=picker("dEmojiBtn","dGrid","🍲");
+function ingRow(g){
+  g=g||{s:"verdu",n:"",q:1,u:"kg"};
+  return `<div class="prow" data-ing style="flex-wrap:wrap;border-bottom:1px dotted var(--line);padding-bottom:6px"><select class="is" style="flex:1 1 100%">${SIDS.map(s=>`<option value="${s}"${s===g.s?" selected":""}>${SNAME[s]}</option>`).join("")}</select>
+    <select class="ip" style="flex:1 1 50%"></select><input class="q iq" type="number" inputmode="decimal" step="any" min="0" value="${g.q}" style="width:58px"><span class="iu" style="font-size:12px;width:34px"></span><button class="x" type="button" data-ix>✕</button></div>`;
+}
+function wireIng(row,g){
+  const is=row.querySelector(".is"), ip=row.querySelector(".ip");
+  const upd=()=>{const o=ip.selectedOptions[0]; row.querySelector(".iu").textContent=o?(UNIT_LABEL[o.dataset.u]||o.dataset.u):""};
+  fillProd(ip,is.value,g&&g.n); upd();
+  is.onchange=()=>{fillProd(ip,is.value);upd()}; ip.onchange=upd;
+  row.querySelector("[data-ix]").onclick=()=>row.remove();
+}
+function addIngRow(g){ const w=document.createElement("div"); w.innerHTML=ingRow(g); const r=w.firstElementChild; $("dIngs").appendChild(r); wireIng(r,g); }
+function openDish(id){
+  const d=id?dishById(id):{id:null,e:"🍲",n:"",ing:[]}; dEditing=id;
+  $("dsTitle").textContent=id?"Editar plato":"Nuevo plato"; dPick.set(d.e); $("dGrid").hidden=true; $("dName").value=d.n;
+  $("dIngs").innerHTML=""; d.ing.forEach(g=>addIngRow(g));
+  $("dDel").style.display=id?"block":"none"; disarm($("dDel"),"🗑️ Borrar plato");
+  $("dsheet").hidden=false;
+}
+function disarm(b,t){delete b.dataset.armed;b.classList.remove("armed");b.textContent=t}
+$("dAddIng").onclick=()=>addIngRow();
+$("dCancel").onclick=()=>{$("dsheet").hidden=true};
+$("dsheet").addEventListener("click",e=>{if(e.target.id==="dsheet")$("dsheet").hidden=true});
+$("dSave").onclick=()=>{
+  const n=$("dName").value.trim(); if(!n) return toast("Poné un nombre");
+  const ing=[...$("dIngs").querySelectorAll("[data-ing]")].map(r=>{const o=r.querySelector(".ip").selectedOptions[0];
+    return o?{s:r.querySelector(".is").value,n:o.value,q:parseFloat(String(r.querySelector(".iq").value).replace(",","."))||0,u:o.dataset.u}:null}).filter(g=>g&&g.q>0);
+  if(dEditing){ const d=dishById(dEditing); d.e=dPick.val; d.n=n; d.ing=ing; }
+  else dishes.push({id:"u"+Date.now(),e:dPick.val,n,ing});
+  saveP(); $("dsheet").hidden=true; renderDishes(); toast("Plato guardado ✔");
+};
+$("dDel").onclick=()=>{
+  const b=$("dDel"); if(!b.dataset.armed){b.dataset.armed=1;b.classList.add("armed");b.textContent="¿Seguro? Tocá de nuevo para borrar";return}
+  dishes=dishes.filter(d=>d.id!==dEditing); for(const i in plan) if(plan[i]&&plan[i].d===dEditing) delete plan[i];
+  saveP(); $("dsheet").hidden=true; renderDishes(); toast("Plato borrado");
+};
+$("dNew").onclick=()=>openDish(null);
+$("dRestore").onclick=()=>{const b=$("dRestore"); if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Seguro? Se pierden tus platos";setTimeout(()=>{delete b.dataset.armed;b.textContent="↺ Platos originales"},3000);return}
+  delete b.dataset.armed;b.textContent="↺ Platos originales";dishes=JSON.parse(JSON.stringify(DEFAULT_DISHES));
+  for(const i in plan) if(plan[i]&&!dishById(plan[i].d)) delete plan[i]; saveP(); renderDishes(); toast("Platos originales")};
+
+// --- eventos del plan
+let ptab="sem";
+function showPT(t){ptab=t; document.querySelectorAll("#ptabs button").forEach(b=>b.classList.toggle("on",b.dataset.pt===t));
+  ["sem","pla","sto"].forEach(x=>$("pv-"+x).classList.toggle("on",x===t));
+  if(t==="sem") renderWeek(); if(t==="pla") renderDishes(); if(t==="sto"){ if(!$("sStore").options.length){fillStore($("sStore"),"verdu");fillProd($("sProd"),"verdu");syncStockForm()} renderStock(); } }
+$("vp").addEventListener("click",ev=>{
+  const b=ev.target.closest("button"); if(!b) return; const D=b.dataset;
+  if(D.pt) showPT(D.pt);
+  else if(D.pcook) cook(+D.pcook);
+  else if(D.pundo) uncook(+D.pundo);
+  else if(D.pdish) openDish(D.pdish);
+  else if(D.sinc||D.sdec){ const k=D.sinc||D.sdec, h=stock[k], st=STEP[h.u]||1; h.q=Math.round((h.q+(D.sinc?st:-st))*100)/100; if(h.q<=0) delete stock[k]; saveP(); renderStock(); }
+});
+$("vp").addEventListener("change",ev=>{ const t=ev.target; if(t.dataset.pday!==undefined){ const i=t.dataset.pday; if(t.value) plan[i]={d:t.value,c:null}; else delete plan[i]; saveP(); renderWeek(); } });
+$("pSuggest").onclick=suggest;
+$("pNew").onclick=()=>{const b=$("pNew"); if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Seguro? Tocá de nuevo";setTimeout(()=>{delete b.dataset.armed;b.textContent="🗓️ Nueva semana"},3000);return}
+  delete b.dataset.armed;b.textContent="🗓️ Nueva semana";plan={};saveP();renderWeek();toast("Semana en blanco")};
+
+// --- modo
+let mode=store.get("mode","ped");
+function setMode(m){
+  mode=m; store.set("mode",m); closeEdit(); $("dsheet").hidden=true;
+  $("mPed").classList.toggle("on",m==="ped"); $("mPlan").classList.toggle("on",m==="plan");
+  document.body.classList.toggle("plan",m==="plan");
+  if(m==="plan"){ ["super","carne","tesai"].forEach(c=>document.body.classList.remove(c)); $("title").textContent="🍽️ Plan semanal de cenas"; showPT(ptab); }
+  else { applyStore(); go(step); }
+  window.scrollTo(0,0);
+}
+$("mPed").onclick=()=>setMode("ped");
+$("mPlan").onclick=()=>setMode("plan");
+
 applyStore();
 go(1);
+if(mode==="plan") setMode("plan");
 </script>
 </body>
 </html>
